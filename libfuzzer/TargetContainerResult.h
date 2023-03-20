@@ -8,6 +8,8 @@ using namespace eth;
 using namespace std;
 
 namespace fuzzer {
+  using Accounts = vector<tuple<bytes, u160, u256, bool>>;
+
   struct TargetContainerResult {
     TargetContainerResult() {}
     TargetContainerResult(
@@ -25,5 +27,14 @@ namespace fuzzer {
     unordered_set<string> uniqExceptions;
     /* Contains checksum of tracebits */
     string cksum;
+    Accounts accounts;
+    TxInfo *conTxInfo;
+    vector<TxInfo *> txInfos;
+    set<u256> overflows;
+    set<u256> underflows;
+    set<u256> mes;
+    set<u256> tds;
+    set<u256> bds;
+    set<u256> res;
   };
 }

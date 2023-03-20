@@ -11,8 +11,16 @@ class OracleFactory {
     SingleFunction function;
     vector<bool> vulnerabilities;
   public:
+    set<u256> overflows;
+    set<u256> underflows;
+    set<u256> mes;
+    set<u256> tds;
+    set<u256> bds;
+    set<u256> res;
     void initialize();
     void finalize();
     void save(OpcodeContext ctx);
     vector<bool> analyze();
+    void dumpOverflow(u256 pc);
+    void dumpUnderflow(u256 pc);
 };

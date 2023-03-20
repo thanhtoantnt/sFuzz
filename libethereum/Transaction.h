@@ -66,6 +66,19 @@ struct VMException;
 TransactionException toTransactionException(Exception const& _e);
 std::ostream& operator<<(std::ostream& _out, TransactionException const& _er);
 
+struct TxInfo
+{
+	Address contractAddr;
+	u160 sender;
+	u256 value;
+	u256 gasPrice;
+	u256 gas;
+	bytes data;
+	u256 nonce;
+	int64_t blockNumber;
+	int64_t timestamp;
+};
+
 /// Description of the result of executing a transaction.
 struct ExecutionResult
 {
@@ -77,6 +90,7 @@ struct ExecutionResult
 	u256 gasRefunded = 0;
 	unsigned depositSize = 0; 										///< Amount of code of the creation's attempted deposit.
 	u256 gasForDeposit; 											///< Amount of gas remaining for the code deposit phase.
+	TxInfo *txInfo;
 };
 
 std::ostream& operator<<(std::ostream& _out, ExecutionResult const& _er);

@@ -7,10 +7,10 @@ namespace fuzzer {
     program->deploy(addr, bytes{code});
     program->setBalance(addr, DEFAULT_BALANCE);
     program->updateEnv(ca.decodeAccounts(), ca.decodeBlock());
-    program->invoke(addr, CONTRACT_CONSTRUCTOR, ca.encodeConstructor(), ca.isPayable(""), onOp);
+    program->invoke(addr, CONTRACT_CONSTRUCTOR, ca.encodeConstructor(), ca.isPayable(""), onOp, false);
   }
 
-  TargetContainerResult TargetExecutive::exec(bytes data, const tuple<unordered_set<uint64_t>, unordered_set<uint64_t>>& validJumpis) {
+  TargetContainerResult TargetExecutive::exec(bytes data, const tuple<unordered_set<uint64_t>, unordered_set<uint64_t>>& validJumpis, bool isMutated) {
     /* Save all hit branches to trace_bits */
     Instruction prevInst;
     RecordParam recordParam;
@@ -67,9 +67,15 @@ namespace fuzzer {
                 auto total256 = left + right;
                 auto total512 = (u512) left + (u512) right;
                 payload.isOverflow = total512 != total256;
+		if (total512 != total256) {
+		  oracleFactory->dumpOverflow(pc);
+		}
               }
               if (inst == Instruction::SUB) {
                 payload.isUnderflow = left < right;
+		if (left < right) {
+		  oracleFactory->dumpUnderflow(pc);
+		}
               }
             }
             oracleFactory->save(OpcodeContext(ext->depth + 1, payload));
@@ -134,7 +140,8 @@ namespace fuzzer {
     payload.caller = sender;
     payload.callee = addr;
     oracleFactory->save(OpcodeContext(0, payload));
-    auto res = program->invoke(addr, CONTRACT_CONSTRUCTOR, ca.encodeConstructor(), ca.isPayable(""), onOp);
+    auto res = program->invoke(addr, CONTRACT_CONSTRUCTOR, ca.encodeConstructor(), ca.isPayable(""), onOp, isMutated);
+    auto conTxInfo = res.txInfo;
     if (res.excepted != TransactionException::None) {
       auto exceptionId = to_string(recordParam.lastpc);
       uniqExceptions.insert(exceptionId) ;
@@ -144,6 +151,7 @@ namespace fuzzer {
       oracleFactory->save(OpcodeContext(0, payload));
     }
     oracleFactory->finalize();
+    TxInfo *tis[funcs.size()];
     for (uint32_t funcIdx = 0; funcIdx < funcs.size(); funcIdx ++ ) {
       /* Update payload */
       auto func = funcs[funcIdx];
@@ -157,7 +165,8 @@ namespace fuzzer {
       payload.caller = sender;
       payload.callee = addr;
       oracleFactory->save(OpcodeContext(0, payload));
-      res = program->invoke(addr, CONTRACT_FUNCTION, func, ca.isPayable(fd.name), onOp);
+      res = program->invoke(addr, CONTRACT_FUNCTION, func, ca.isPayable(fd.name), onOp, isMutated);
+      tis[funcIdx] = res.txInfo;
       outputs.push_back(res.output);
       if (res.excepted != TransactionException::None) {
         auto exceptionId = to_string(recordParam.lastpc);
@@ -173,6 +182,18 @@ namespace fuzzer {
     program->rollback(savepoint);
     string cksum = "";
     for (auto t : tracebits) cksum = cksum + t;
-    return TargetContainerResult(tracebits, predicates, uniqExceptions, cksum);
+    auto tcRes = TargetContainerResult(tracebits, predicates, uniqExceptions, cksum);
+    tcRes.accounts = ca.decodeAccounts();
+    tcRes.conTxInfo = conTxInfo;
+    for (uint32_t funcIdx = 0; funcIdx < funcs.size(); funcIdx++) {
+      tcRes.txInfos.push_back(tis[funcIdx]);
+    }
+    tcRes.overflows = oracleFactory->overflows;
+    tcRes.underflows = oracleFactory->underflows;
+    tcRes.mes = oracleFactory->mes;
+    tcRes.tds = oracleFactory->tds;
+    tcRes.bds = oracleFactory->bds;
+    tcRes.res = oracleFactory->res;
+    return tcRes;
   }
 }

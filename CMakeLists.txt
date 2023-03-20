@@ -39,8 +39,8 @@ option(HUNTER_RUN_UPLOAD "Upload binaries to the cache server" ${run_upload})
 
 include(HunterGate)
 HunterGate(
-    URL "https://github.com/ruslo/hunter/archive/v0.21.16.tar.gz"
-    SHA1 "aa1faccd24f33dd2c368f85a4e9ca2e5d9c249cb"
+    URL "https://github.com/SoftSec-KAIST/Smartian-Artifact/raw/main/docker-setup/sFuzz/v0.21.16.tar.gz"
+    SHA1 "bbbaf5385efe15f9c098a3263aaf44cce9279859"
     LOCAL
 )
 
