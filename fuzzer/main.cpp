@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include <libfuzzer/Fuzzer.h>
 #include "Utils.h"
 
@@ -12,6 +13,8 @@ static int DEFAULT_ANALYZING_INTERVAL = 5; // 5 sec
 static string DEFAULT_CONTRACTS_FOLDER = "contracts/";
 static string DEFAULT_ASSETS_FOLDER = "assets/";
 static string DEFAULT_ATTACKER = "ReentrancyAttacker";
+static string DEFAULT_TC_DIR = "output/";
+static string DEFAULT_VULN_LOG = "output/log.txt";
 
 int main(int argc, char* argv[]) {
   /* Run EVM silently */
@@ -28,6 +31,8 @@ int main(int argc, char* argv[]) {
   string contractName = "";
   string sourceFile = "";
   string attackerName = DEFAULT_ATTACKER;
+  string tcDir = DEFAULT_TC_DIR;
+  string vulnLog = DEFAULT_VULN_LOG;
   po::options_description desc("Allowed options");
   po::variables_map vm;
   
@@ -42,7 +47,9 @@ int main(int argc, char* argv[]) {
     ("mode,m", po::value(&mode), "choose mode: 0 - AFL ")
     ("reporter,r", po::value(&reporter), "choose reporter: 0 - TERMINAL | 1 - JSON")
     ("duration,d", po::value(&duration), "fuzz duration")
-    ("attacker", po::value(&attackerName), "choose attacker: NormalAttacker | ReentrancyAttacker");
+    ("attacker", po::value(&attackerName), "choose attacker: NormalAttacker | ReentrancyAttacker")
+    ("tcdir", po::value(&tcDir), "test directory path")
+    ("vulnlog", po::value(&vulnLog), "vulnerability directory path");
   po::store(po::parse_command_line(argc, argv, desc), vm);
   po::notify(vm);
   /* Show help message */
@@ -53,7 +60,7 @@ int main(int argc, char* argv[]) {
     fuzzMe << "#!/bin/bash" << endl;
     fuzzMe << compileSolFiles(contractsFolder);
     fuzzMe << compileSolFiles(assetsFolder);
-    fuzzMe << fuzzJsonFiles(contractsFolder, assetsFolder, duration, mode, reporter, attackerName);
+    fuzzMe << fuzzJsonFiles(contractsFolder, assetsFolder, duration, mode, reporter, attackerName, tcDir, vulnLog);
     fuzzMe.close();
     showGenerate();
     return 0;
@@ -69,7 +76,10 @@ int main(int argc, char* argv[]) {
     fuzzParam.reporter = (Reporter) reporter;
     fuzzParam.analyzingInterval = DEFAULT_ANALYZING_INTERVAL;
     fuzzParam.attackerName = attackerName;
-    Fuzzer fuzzer(fuzzParam);
+    fuzzParam.tcDir = tcDir;
+    std::ofstream vl(vulnLog);
+    vl.rdbuf()->pubsetbuf(0, 0);
+    Fuzzer fuzzer(fuzzParam, vl);
     cout << ">> Fuzz " << contractName << endl;
     fuzzer.start();
     return 0;

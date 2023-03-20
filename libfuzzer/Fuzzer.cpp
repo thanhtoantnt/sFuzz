@@ -14,7 +14,7 @@ using namespace fuzzer;
 namespace pt = boost::property_tree;
 
 /* Setup virgin byte to 255 */
-Fuzzer::Fuzzer(FuzzParam fuzzParam): fuzzParam(fuzzParam){
+Fuzzer::Fuzzer(FuzzParam fuzzParam, std::ofstream &vulnLog): fuzzParam(fuzzParam), vulnLog(vulnLog) {
   fill_n(fuzzStat.stageFinds, 32, 0);
 }
 
@@ -144,13 +144,134 @@ void Fuzzer::writeStats(const Mutation &mutation) {
   stats.close();
 }
 
+string dumpBytes(bytes data) {
+  string bs = "";
+  for (auto it = data.begin(); it != data.end(); it++) {
+    char buf[8];
+    sprintf(buf, "%02x", *it);
+    string s = buf;
+    bs += s;
+  }
+  return bs;
+}
+
+void dumpTxInfo(std::ofstream &stream, TxInfo *txInfo, std::string attackerName) {
+  stream << "Dump Transaction" << endl;
+  stream << txInfo->contractAddr.hex() << endl;
+  stream << toString(txInfo->sender) << endl;
+  stream << toString(txInfo->value) << endl;
+  stream << toString(txInfo->gasPrice) << endl;
+  stream << toString(txInfo->gas) << endl;
+  stream << dumpBytes(txInfo->data) << endl;
+  stream << toString(txInfo->nonce) << endl;
+  stream << txInfo->blockNumber << endl;
+  stream << txInfo->timestamp << endl;
+  stream << attackerName << endl;
+}
+
+void dumpAccounts(std::ofstream &stream, Accounts accounts) {
+  for (auto it = accounts.begin(); it != accounts.end(); it++) {
+    stream << "Dump Account" << endl;
+    stream << toString(get<1>(*it)) << endl;
+    stream << toString(get<2>(*it)) << endl;
+    stream << get<3>(*it) << endl;
+  }
+}
+
+void Fuzzer::dumpTC(TargetContainerResult res, bytes data, double time) {
+  char buf[100];
+  snprintf(buf, sizeof(buf), "%stc_%.5f", fuzzParam.tcDir.c_str(), time);
+  string filename = buf;
+  std::ofstream tc(filename);
+  dumpAccounts(tc, res.accounts);
+  dumpTxInfo(tc, res.conTxInfo, fuzzParam.attackerName);
+  for (auto it = res.txInfos.begin(); it != res.txInfos.end(); it++) {
+    dumpTxInfo(tc, *it, fuzzParam.attackerName);
+  }
+  tc.close();
+}
+
+void printVuln(double time, uint64_t pc, char *sig, std::ofstream &vulnLog) {
+  char buf[100];
+  int d, h, m, s;
+  d = h = m = s = 0;
+  s = time;
+  d = s / 86400;
+  s -= (d * 86400);
+  h = s / 3600;
+  s -= (h * 3600);
+  m = s / 60;
+  s -= (m * 60);
+  snprintf(buf, sizeof(buf), "[%02i:%02i:%02i:%02i] Found %s at ", d, h, m, s, sig);
+  string str = buf;
+  vulnLog << str << hex << pc << endl;
+}
+
+void Fuzzer::dumpVuln(TargetContainerResult tcRes, double time) {
+  for (auto it = tcRes.overflows.begin(); it != tcRes.overflows.end(); it++) {
+    auto finder = overflows.find(*it);
+    if (finder == overflows.end()) {
+      uint64_t pc = static_cast<uint64_t> (*it);
+      printVuln(time, pc, "IntegerBug", vulnLog);
+      overflows.insert(*it);
+    }
+  }
+  for (auto it = tcRes.underflows.begin(); it != tcRes.underflows.end(); it++) {
+    auto finder = underflows.find(*it);
+    if (finder == underflows.end()) {
+      char buf[100];
+      uint64_t pc = static_cast<uint64_t> (*it);
+      printVuln(time, pc, "IntegerBug", vulnLog);
+      underflows.insert(*it);
+    }
+  }
+  for (auto it = tcRes.mes.begin(); it != tcRes.mes.end(); it++) {
+    auto finder = mes.find(*it);
+    if (finder == mes.end()) {
+      char buf[100];
+      uint64_t pc = static_cast<uint64_t> (*it);
+      printVuln(time, 0, "MishandledException", vulnLog);
+      mes.insert(*it);
+    }
+  }
+  for (auto it = tcRes.tds.begin(); it != tcRes.tds.end(); it++) {
+    auto finder = tds.find(*it);
+    if (finder == tds.end()) {
+      char buf[100];
+      uint64_t pc = static_cast<uint64_t> (*it);
+      printVuln(time, 0, "BlockstateDependency", vulnLog);
+      tds.insert(*it);
+    }
+  }
+  for (auto it = tcRes.bds.begin(); it != tcRes.bds.end(); it++) {
+    auto finder = bds.find(*it);
+    if (finder == bds.end()) {
+      char buf[100];
+      uint64_t pc = static_cast<uint64_t> (*it);
+      printVuln(time, 0, "BlockstateDependency", vulnLog);
+      bds.insert(*it);
+    }
+  }
+  for (auto it = tcRes.res.begin(); it != tcRes.res.end(); it++) {
+    auto finder = res.find(*it);
+    if (finder == res.end()) {
+      char buf[100];
+      uint64_t pc = static_cast<uint64_t> (*it);
+      printVuln(time, 0, "Reentrancy", vulnLog);
+      res.insert(*it);
+    }
+  }
+}
+
 /* Save data if interest */
-FuzzItem Fuzzer::saveIfInterest(TargetExecutive& te, bytes data, uint64_t depth, const tuple<unordered_set<uint64_t>, unordered_set<uint64_t>>& validJumpis) {
+FuzzItem Fuzzer::saveIfInterest(TargetExecutive& te, bytes data, uint64_t depth, const tuple<unordered_set<uint64_t>, unordered_set<uint64_t>>& validJumpis, bool isMutated) {
   auto revisedData = ContractABI::postprocessTestData(data);
   FuzzItem item(revisedData);
-  item.res = te.exec(revisedData, validJumpis);
+  item.res = te.exec(revisedData, validJumpis, isMutated);
   //Logger::debug(Logger::testFormat(item.data));
   fuzzStat.totalExecs ++;
+  bool hasNewCov = false;
+  double elapsed = timer.elapsed();
   for (auto tracebit: item.res.tracebits) {
     if (!tracebits.count(tracebit)) {
       // Remove leader
@@ -166,6 +287,7 @@ FuzzItem Fuzzer::saveIfInterest(TargetExecutive& te, bytes data, uint64_t depth,
       fuzzStat.lastNewPath = timer.elapsed();
       Logger::debug("Cover new branch "  + tracebit);
       Logger::debug(Logger::testFormat(item.data));
+      hasNewCov = true;
     }
   }
   for (auto predicateIt: item.res.predicates) {
@@ -198,11 +320,14 @@ FuzzItem Fuzzer::saveIfInterest(TargetExecutive& te, bytes data, uint64_t depth,
       Logger::debug("Found new uncovered branch");
       Logger::debug("now: " + predicateIt.second.str());
       Logger::debug(Logger::testFormat(item.data));
+      hasNewCov = true;
     }
   }
   updateExceptions(item.res.uniqExceptions);
   updateTracebits(item.res.tracebits);
   updatePredicates(item.res.predicates);
+  dumpVuln(item.res, elapsed);
+  if (hasNewCov) dumpTC(item.res, revisedData, elapsed);
   return item;
 }
 
@@ -273,7 +398,7 @@ void Fuzzer::start() {
         cout << "No valid jumpi" << endl;
         stop();
       }
-      saveIfInterest(executive, ca.randomTestcase(), 0, validJumpis);
+      saveIfInterest(executive, ca.randomTestcase(), 0, validJumpis, false);
       int originHitCount = leaders.size();
       // No branch
       if (!originHitCount) {
@@ -318,7 +443,7 @@ void Fuzzer::start() {
         }
         Mutation mutation(curItem, make_tuple(codeDict, addressDict));
         auto save = [&](bytes data) {
-          auto item = saveIfInterest(executive, data, curItem.depth, validJumpis);
+          auto item = saveIfInterest(executive, data, curItem.depth, validJumpis, true);
           /* Show every one second */
           u64 duration = timer.elapsed();
           if (!showSet.count(duration)) {

@@ -23,11 +23,11 @@ namespace fuzzer {
     blockHeader.setNumber(blockNumber);
     envInfo = new EnvInfo(blockHeader, lastBlockHashes, 0);
   }
-  
+
   void TargetProgram::setBalance(Address addr, u256 balance) {
     state.setBalance(addr, balance);
   }
-    
+
   u256 TargetProgram::getBalance(Address addr) {
     return state.balance(addr);
   }
@@ -36,36 +36,37 @@ namespace fuzzer {
     state.clearStorage(addr);
     state.setCode(addr, bytes{code});
   }
-    
+
   bytes TargetProgram::getCode(Address addr) {
     return state.code(addr);
   }
-  
-  ExecutionResult TargetProgram::invoke(Address addr, ContractCall type, bytes data, bool payable, OnOpFunc onOp) {
+
+  ExecutionResult TargetProgram::invoke(Address addr, ContractCall type, bytes data, bool payable, OnOpFunc onOp, bool isMutated) {
     switch (type) {
       case CONTRACT_CONSTRUCTOR: {
         bytes code = state.code(addr);
         code.insert(code.end(), data.begin(), data.end());
         state.setCode(addr, bytes{code});
-        ExecutionResult res = invoke(addr, data, payable, onOp);
+		ExecutionResult res = invoke(addr, data, payable, onOp, isMutated, true);
         state.setCode(addr, bytes{res.output});
         return res;
       }
       case CONTRACT_FUNCTION: {
-        return invoke(addr, data, payable, onOp);
+		  return invoke(addr, data, payable, onOp, isMutated, false);
       }
       default: {
         throw "Unknown invoke type";
       }
     }
   }
-  
-  ExecutionResult TargetProgram::invoke(Address addr, bytes data, bool payable, OnOpFunc onOp) {
+
+  ExecutionResult TargetProgram::invoke(Address addr, bytes data, bool payable, OnOpFunc onOp, bool isMutated, bool isConstructor) {
     ExecutionResult res;
     Address senderAddr(sender);
     u256 value = payable ? state.balance(sender) / 2 : 0;
     u256 gasPrice = 0;
-    Transaction t = Transaction(value, gasPrice, gas, data, state.getNonce(sender));
+	auto nonce = state.getNonce(sender);
+	Transaction t = Transaction(value, gasPrice, gas, data, nonce);
     t.forceSender(senderAddr);
     Executive executive(state, *envInfo, *se);
     executive.setResultRecipient(res);
@@ -75,6 +76,16 @@ namespace fuzzer {
     executive.updateBlock(blockNumber, timestamp);
     executive.go(onOp);
     executive.finalize();
+    res.txInfo = new TxInfo;
+    res.txInfo->contractAddr = addr;
+    res.txInfo->sender = sender;
+    res.txInfo->value = value;
+    res.txInfo->gasPrice = gasPrice;
+    res.txInfo->gas = gas;
+    res.txInfo->data = data;
+    res.txInfo->nonce = nonce;
+    res.txInfo->blockNumber = blockNumber;
+    res.txInfo->timestamp = timestamp;
     return res;
   }
 
@@ -97,10 +108,9 @@ namespace fuzzer {
   size_t TargetProgram::savepoint() {
     return state.savepoint();
   }
-  
+
   TargetProgram::~TargetProgram() {
     delete envInfo;
     delete se;
   }
 }
-

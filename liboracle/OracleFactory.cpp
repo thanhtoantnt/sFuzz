@@ -17,6 +17,14 @@ void OracleFactory::save(OpcodeContext ctx) {
   function.push_back(ctx);
 }
 
+void OracleFactory::dumpOverflow(u256 pc) {
+  overflows.insert(pc);
+}
+
+void OracleFactory::dumpUnderflow(u256 pc) {
+  underflows.insert(pc);
+}
+
 vector<bool> OracleFactory::analyze() {
   uint8_t total = 9;
   while (vulnerabilities.size() < total) {
@@ -40,28 +48,42 @@ vector<bool> OracleFactory::analyze() {
             auto rootCallResponse = function[function.size() - 1];
             bool rootException = rootCallResponse.payload.inst == Instruction::INVALID && !rootCallResponse.level;
             for (auto ctx : function) {
-              vulnerabilities[i] = vulnerabilities[i] || (!rootException && ctx.payload.inst == Instruction::INVALID && ctx.level);
+              auto cond = !rootException && ctx.payload.inst == Instruction::INVALID && ctx.level;
+	      if (cond) mes.insert(ctx.payload.pc);
+              vulnerabilities[i] = vulnerabilities[i] || cond;
             }
             break;
           }
           case TIME_DEPENDENCY: {
             auto has_transfer = false;
             auto has_timestamp = false;
+	    u256 timestamp_pc;
             for (auto ctx : function) {
               has_transfer = has_transfer || ctx.payload.wei > 0;
-              has_timestamp = has_timestamp || ctx.payload.inst == Instruction::TIMESTAMP;
+	      auto has_timestamp_cond = ctx.payload.inst == Instruction::TIMESTAMP;
+              has_timestamp = has_timestamp || has_timestamp_cond;
+	      if (has_transfer && ctx.payload.pc != 0) timestamp_pc = ctx.payload.pc;
             }
-            vulnerabilities[i] = has_transfer && has_timestamp;
+	    auto cond = has_transfer && has_timestamp;
+	    if (cond) {
+              tds.insert(timestamp_pc);
+	    }
+            vulnerabilities[i] = cond;
             break;
           }
           case NUMBER_DEPENDENCY: {
             auto has_transfer = false;
             auto has_number = false;
+	    u256 number_pc;
             for (auto ctx : function) {
               has_transfer = has_transfer || ctx.payload.wei > 0;
-              has_number = has_number || ctx.payload.inst == Instruction::NUMBER;
+	      auto has_number_cond = ctx.payload.inst == Instruction::NUMBER;
+              has_number = has_number || has_number_cond;
+	      if (has_transfer && ctx.payload.pc != 0) number_pc = ctx.payload.pc;
             }
-            vulnerabilities[i] = has_transfer && has_number;
+	    auto cond = has_transfer && has_number;
+	    if (cond) bds.insert(number_pc);
+            vulnerabilities[i] = cond;
             break;
           }
           case DELEGATE_CALL: {
@@ -81,16 +103,26 @@ vector<bool> OracleFactory::analyze() {
           case REENTRANCY: {
             auto has_loop = false;
             auto has_transfer = false;
+	    u256 re_pc;
             for (auto ctx : function) {
-              has_loop = has_loop || (ctx.level >= 4 &&  toHex(ctx.payload.data) == "000000ff");
+              auto has_loop_cond = ctx.level >= 4 &&  toHex(ctx.payload.data) == "000000ff";
+              has_loop = has_loop || has_loop_cond;
               has_transfer = has_transfer || ctx.payload.wei > 0;
+	      if (has_loop_cond) {
+		re_pc = ctx.payload.pc;
+	      }
             }
-            vulnerabilities[i] = has_loop && has_transfer;
+	    auto cond = has_loop && has_transfer;
+	    if (cond) {
+              res.insert(re_pc);
+	    }
+            vulnerabilities[i] = cond;
             break;
           }
           case FREEZING: {
             auto has_delegate = false;
             auto has_transfer = false;
+	    u256 fe_pc;
             for (auto ctx: function) {
               has_delegate = has_delegate || ctx.payload.inst == Instruction::DELEGATECALL;
               has_transfer = has_transfer || (ctx.level == 1 && (

@@ -19,7 +19,7 @@ namespace fuzzer {
       u160 sender;
       EnvInfo *envInfo;
       SealEngineFace *se;
-      ExecutionResult invoke(Address addr, bytes data, bool payable, OnOpFunc onOp);
+      ExecutionResult invoke(Address addr, bytes data, bool payable, OnOpFunc onOp, bool isMutated, bool isConstructor);
     public:
       TargetProgram();
       ~TargetProgram();
@@ -32,6 +32,6 @@ namespace fuzzer {
       unordered_map<Address, u256> addresses();
       size_t savepoint();
       void rollback(size_t savepoint);
-      ExecutionResult invoke(Address addr, ContractCall type, bytes data, bool payable, OnOpFunc onOp);
+      ExecutionResult invoke(Address addr, ContractCall type, bytes data, bool payable, OnOpFunc onOp, bool isMutated);
   };
 }

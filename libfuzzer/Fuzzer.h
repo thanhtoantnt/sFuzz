@@ -32,6 +32,7 @@ namespace fuzzer {
     int duration;
     int analyzingInterval;
     string attackerName;
+    string tcDir;
   };
   struct FuzzStat {
     int idx = 0;
@@ -58,13 +59,22 @@ namespace fuzzer {
     unordered_map<uint64_t, string> snippets;
     unordered_set<string> uniqExceptions;
     Timer timer;
+    set<u256> overflows;
+    set<u256> underflows;
+    set<u256> mes;
+    set<u256> tds;
+    set<u256> bds;
+    set<u256> res;
     FuzzParam fuzzParam;
     FuzzStat fuzzStat;
     void writeStats(const Mutation &mutation);
     ContractInfo mainContract();
+    std::ofstream &vulnLog;
     public:
-      Fuzzer(FuzzParam fuzzParam);
-      FuzzItem saveIfInterest(TargetExecutive& te, bytes data, uint64_t depth, const tuple<unordered_set<uint64_t>, unordered_set<uint64_t>> &validJumpis);
+      Fuzzer(FuzzParam fuzzParam, std::ofstream &vulnLog);
+      void dumpTC(TargetContainerResult res, bytes data, double time);
+      void dumpVuln(TargetContainerResult res, double time);
+      FuzzItem saveIfInterest(TargetExecutive& te, bytes data, uint64_t depth, const tuple<unordered_set<uint64_t>, unordered_set<uint64_t>> &validJumpis, bool isMutated);
       void showStats(const Mutation &mutation, const tuple<unordered_set<uint64_t>, unordered_set<uint64_t>> &validJumpis);
       void updateTracebits(unordered_set<string> tracebits);
       void updatePredicates(unordered_map<string, u256> predicates);
