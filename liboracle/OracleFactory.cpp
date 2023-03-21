@@ -131,8 +131,13 @@ vector<bool> OracleFactory::analyze() {
                 || ctx.payload.inst == Instruction::CALLCODE
                 || ctx.payload.inst == Instruction::SUICIDE
               ));
+			  auto cond = has_delegate && !has_transfer;
+			  if (cond) {
+				  lock_ether.insert(ctx.payload.pc);
+			  }
+
+			  vulnerabilities[i] = cond;
             }
-            vulnerabilities[i] = has_delegate && !has_transfer;
             break;
           }
           case UNDERFLOW: {

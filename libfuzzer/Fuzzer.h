@@ -66,6 +66,7 @@ namespace fuzzer {
     set<u256> bds;
     set<u256> res;
     set<u256> del;
+	set<u256> lock_ether;
     FuzzParam fuzzParam;
     FuzzStat fuzzStat;
     void writeStats(const Mutation &mutation);

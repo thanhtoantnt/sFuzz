@@ -263,6 +263,16 @@ void Fuzzer::dumpVuln(TargetContainerResult tcRes, double time) {
 	  }
   }
 
+  for (auto it = tcRes.lock_ether.begin(); it != tcRes.lock_ether.end(); it++) {
+	  auto finder = lock_ether.find(*it);
+	  if (finder == lock_ether.end()) {
+		  char buf[100];
+		  uint64_t pc = static_cast<uint64_t> (*it);
+		  printVuln(time, 0, "LockEther", vulnLog);
+		  del.insert(*it);
+	  }
+  }
+
   for (auto it = tcRes.res.begin(); it != tcRes.res.end(); it++) {
     auto finder = res.find(*it);
     if (finder == res.end()) {

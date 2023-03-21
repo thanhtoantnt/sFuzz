@@ -195,6 +195,7 @@ namespace fuzzer {
     tcRes.bds = oracleFactory->bds;
     tcRes.res = oracleFactory->res;
     tcRes.del = oracleFactory->del;
+    tcRes.lock_ether = oracleFactory->lock_ether;
     return tcRes;
   }
 }

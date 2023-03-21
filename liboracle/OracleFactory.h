@@ -18,6 +18,7 @@ class OracleFactory {
     set<u256> bds;
     set<u256> res;
 	set<u256> del;
+    set<u256> lock_ether;
     void initialize();
     void finalize();
     void save(OpcodeContext ctx);

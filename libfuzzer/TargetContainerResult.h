@@ -37,5 +37,6 @@ namespace fuzzer {
     set<u256> bds;
     set<u256> res;
 	set<u256> del;
+	set<u256> lock_ether;
   };
 }
