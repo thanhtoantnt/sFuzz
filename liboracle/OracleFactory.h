@@ -17,6 +17,7 @@ class OracleFactory {
     set<u256> tds;
     set<u256> bds;
     set<u256> res;
+	set<u256> del;
     void initialize();
     void finalize();
     void save(OpcodeContext ctx);

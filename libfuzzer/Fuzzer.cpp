@@ -252,6 +252,17 @@ void Fuzzer::dumpVuln(TargetContainerResult tcRes, double time) {
       bds.insert(*it);
     }
   }
+
+  for (auto it = tcRes.del.begin(); it != tcRes.del.end(); it++) {
+	  auto finder = del.find(*it);
+	  if (finder == del.end()) {
+		  char buf[100];
+		  uint64_t pc = static_cast<uint64_t> (*it);
+		  printVuln(time, 0, "DeletegateCall", vulnLog);
+		  del.insert(*it);
+	  }
+  }
+
   for (auto it = tcRes.res.begin(); it != tcRes.res.end(); it++) {
     auto finder = res.find(*it);
     if (finder == res.end()) {

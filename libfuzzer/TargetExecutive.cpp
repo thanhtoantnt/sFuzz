@@ -194,6 +194,7 @@ namespace fuzzer {
     tcRes.tds = oracleFactory->tds;
     tcRes.bds = oracleFactory->bds;
     tcRes.res = oracleFactory->res;
+    tcRes.del = oracleFactory->del;
     return tcRes;
   }
 }

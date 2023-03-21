@@ -74,7 +74,7 @@ vector<bool> OracleFactory::analyze() {
           case NUMBER_DEPENDENCY: {
             auto has_transfer = false;
             auto has_number = false;
-	    u256 number_pc;
+	        u256 number_pc;
             for (auto ctx : function) {
               has_transfer = has_transfer || ctx.payload.wei > 0;
 	      auto has_number_cond = ctx.payload.inst == Instruction::NUMBER;
@@ -92,10 +92,11 @@ vector<bool> OracleFactory::analyze() {
             auto caller = rootCall.payload.caller;
             for (auto ctx : function) {
               if (ctx.payload.inst == Instruction::DELEGATECALL) {
-                vulnerabilities[i] = vulnerabilities[i]
-                    || data == ctx.payload.data
-                    || caller == ctx.payload.callee
-                    || toHex(data).find(toHex(ctx.payload.callee)) != string::npos;
+				  auto cond = data == ctx.payload.data
+					  || caller == ctx.payload.callee
+					  || toHex(data).find(toHex(ctx.payload.callee)) != string::npos;
+				  if (cond) del.insert(ctx.payload.pc);
+				  vulnerabilities[i] = vulnerabilities[i] || cond;
               }
             }
             break;
