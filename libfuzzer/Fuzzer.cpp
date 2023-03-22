@@ -230,7 +230,7 @@ void Fuzzer::dumpVuln(TargetContainerResult tcRes, double time) {
     if (finder == mes.end()) {
       char buf[100];
       uint64_t pc = static_cast<uint64_t> (*it);
-      printVuln(time, 0, "MishandledException", vulnLog);
+      printVuln(time, pc, "MishandledException", vulnLog);
       mes.insert(*it);
     }
   }
@@ -239,7 +239,7 @@ void Fuzzer::dumpVuln(TargetContainerResult tcRes, double time) {
     if (finder == tds.end()) {
       char buf[100];
       uint64_t pc = static_cast<uint64_t> (*it);
-      printVuln(time, 0, "BlockstateDependency", vulnLog);
+      printVuln(time, pc, "BlockstateDependency", vulnLog);
       tds.insert(*it);
     }
   }
@@ -248,7 +248,7 @@ void Fuzzer::dumpVuln(TargetContainerResult tcRes, double time) {
     if (finder == bds.end()) {
       char buf[100];
       uint64_t pc = static_cast<uint64_t> (*it);
-      printVuln(time, 0, "BlockstateDependency", vulnLog);
+      printVuln(time, pc, "BlockstateDependency", vulnLog);
       bds.insert(*it);
     }
   }
@@ -258,7 +258,7 @@ void Fuzzer::dumpVuln(TargetContainerResult tcRes, double time) {
 	  if (finder == del.end()) {
 		  char buf[100];
 		  uint64_t pc = static_cast<uint64_t> (*it);
-		  printVuln(time, 0, "DeletegateCall", vulnLog);
+		  printVuln(time, pc, "DeletegateCall", vulnLog);
 		  del.insert(*it);
 	  }
   }
@@ -268,7 +268,7 @@ void Fuzzer::dumpVuln(TargetContainerResult tcRes, double time) {
 	  if (finder == lock_ether.end()) {
 		  char buf[100];
 		  uint64_t pc = static_cast<uint64_t> (*it);
-		  printVuln(time, 0, "LockEther", vulnLog);
+		  printVuln(time, pc, "LockEther", vulnLog);
 		  del.insert(*it);
 	  }
   }
@@ -278,7 +278,7 @@ void Fuzzer::dumpVuln(TargetContainerResult tcRes, double time) {
     if (finder == res.end()) {
       char buf[100];
       uint64_t pc = static_cast<uint64_t> (*it);
-      printVuln(time, 0, "Reentrancy", vulnLog);
+      printVuln(time, pc, "Reentrancy", vulnLog);
       res.insert(*it);
     }
   }
