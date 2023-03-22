@@ -129,7 +129,10 @@ void Fuzzer::showStats(const Mutation &mutation, const tuple<unordered_set<uint6
   printf(bBL bV20 bV2 bV10 bV5 bV2 bV bBTR bV10 bV5 bV20 bV2 bV2 bBR "\n");
 }
 
-void Fuzzer::writeStats(const Mutation &mutation) {
+void Fuzzer::writeStats(const Mutation &mutation, const tuple<unordered_set<uint64_t>, unordered_set<uint64_t>> &validJumpis)
+{
+  auto totalBranches = (get<0>(validJumpis).size() + get<1>(validJumpis).size()) * 2;
+  auto coverage = padStr(to_string((uint64_t)((float) tracebits.size() / (float) totalBranches * 100)) + "%", 15);
   auto contract = mainContract();
   stringstream ss;
   pt::ptree root;
@@ -139,6 +142,11 @@ void Fuzzer::writeStats(const Mutation &mutation) {
   root.put("speed", (double) fuzzStat.totalExecs / timer.elapsed());
   root.put("queueCycles", fuzzStat.queueCycle);
   root.put("uniqExceptions", uniqExceptions.size());
+  root.put("coverage", coverage.c_str());
+  // char buf[100];
+  // snprintf(buf, sizeof(buf), "Coverage: %s", coverage.c_str());
+  // string str = buf;
+  // vulnLog << str << endl;
   pt::write_json(ss, root);
   stats << ss.str() << endl;
   stats.close();
@@ -439,12 +447,12 @@ void Fuzzer::start() {
             break;
           }
           case JSON: {
-            writeStats(mutation);
+			  writeStats(mutation, validJumpis);
             break;
           }
           case BOTH: {
             showStats(mutation, validJumpis);
-            writeStats(mutation);
+            writeStats(mutation, validJumpis);
             break;
           }
         }
@@ -478,12 +486,12 @@ void Fuzzer::start() {
                 break;
               }
               case JSON: {
-                writeStats(mutation);
+				  writeStats(mutation, validJumpis);
                 break;
               }
               case BOTH: {
                 showStats(mutation, validJumpis);
-                writeStats(mutation);
+                writeStats(mutation, validJumpis);
                 break;
               }
             }
@@ -498,12 +506,12 @@ void Fuzzer::start() {
                 break;
               }
               case JSON: {
-                writeStats(mutation);
+				  writeStats(mutation, validJumpis);
                 break;
               }
               case BOTH: {
                 showStats(mutation, validJumpis);
-                writeStats(mutation);
+                writeStats(mutation, validJumpis);
                 break;
               }
             }

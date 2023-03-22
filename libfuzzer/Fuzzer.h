@@ -69,7 +69,7 @@ namespace fuzzer {
 	set<u256> lock_ether;
     FuzzParam fuzzParam;
     FuzzStat fuzzStat;
-    void writeStats(const Mutation &mutation);
+	void writeStats(const Mutation &mutation, const tuple<unordered_set<uint64_t>, unordered_set<uint64_t>> &validJumpis);
     ContractInfo mainContract();
     std::ofstream &vulnLog;
     public:
