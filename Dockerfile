@@ -11,15 +11,16 @@ RUN pip3 install solc-select
 RUN solc-select install 0.4.16
 RUN cp ~/.solc-select/artifacts/solc-0.4.16/solc-0.4.16 /bin/
 
-git clone --recursive git@github.com:thanhtoantnt/sFuzz.git sfuzz
+RUN git clone --recursive https://github.com/thanhtoantnt/sFuzz.git sfuzz
 WORKDIR sfuzz
 RUN ./scripts/install_deps.sh
 RUN mkdir build
 WORKDIR build
 RUN cmake ../
 WORKDIR fuzzer
-RUN cp ../../assets .
+RUN cp ../../assets . -r
 RUN make
 RUN mkdir output
+RUN mkdir contracts
 
 ENTRYPOINT [ "/bin/bash" ]
