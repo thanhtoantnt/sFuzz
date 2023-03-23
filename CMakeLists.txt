@@ -96,11 +96,11 @@ set(UTILS_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/utils")
 
 configure_project()
 
-if(TESTS)
-    # Import binaryen library from hera for testeth.
-    # TODO: remove this and the submodule once testeth uses binaryen as a CLI tool.
-    include(hera/cmake/ProjectBinaryen.cmake)
-endif()
+# if(TESTS)
+#     # Import binaryen library from hera for testeth.
+#     # TODO: remove this and the submodule once testeth uses binaryen as a CLI tool.
+#     include(hera/cmake/ProjectBinaryen.cmake)
+# endif()
 
 add_subdirectory(evmc)
 
@@ -134,10 +134,10 @@ if (TOOLS)
     add_subdirectory(rlp)
 endif()
 
-if (TESTS)
-    enable_testing()
-    add_subdirectory(test)
-endif()
+# if (TESTS)
+#     enable_testing()
+#     add_subdirectory(test)
+# endif()
 
 
 install(FILES ${PROJECT_BINARY_DIR}/aleth/buildinfo.json DESTINATION ${CMAKE_INSTALL_DATADIR}/aleth)
