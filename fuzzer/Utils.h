@@ -114,6 +114,18 @@ string compileSolFiles(string folder) {
   return ret.str();
 }
 
+string compileSolFilesAttacker(string folder) {
+	stringstream ret;
+	forEachFile(folder, ".sol", [&](directory_entry file) {
+		string filePath = file.path().string();
+		ret << "solc-0.4.16";
+		ret << " --combined-json abi,bin,bin-runtime,srcmap,srcmap-runtime,ast " + filePath;
+		ret << " > " + filePath + ".json";
+		ret << endl;
+	});
+	return ret.str();
+}
+
 string fuzzJsonFiles(string contracts, string assets, int duration, int mode, int reporter, string attackerName, string tcDir, string vulnLog) {
   stringstream ret;
   unordered_set<string> contractNames;

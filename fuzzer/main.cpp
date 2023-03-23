@@ -35,7 +35,7 @@ int main(int argc, char* argv[]) {
   string vulnLog = DEFAULT_VULN_LOG;
   po::options_description desc("Allowed options");
   po::variables_map vm;
-  
+
   desc.add_options()
     ("help,h", "produce help message")
     ("contracts,c", po::value(&contractsFolder), "contract's folder path")
@@ -59,7 +59,7 @@ int main(int argc, char* argv[]) {
     std::ofstream fuzzMe("fuzzMe");
     fuzzMe << "#!/bin/bash" << endl;
     fuzzMe << compileSolFiles(contractsFolder);
-    fuzzMe << compileSolFiles(assetsFolder);
+    fuzzMe << compileSolFilesAttacker(assetsFolder);
     fuzzMe << fuzzJsonFiles(contractsFolder, assetsFolder, duration, mode, reporter, attackerName, tcDir, vulnLog);
     fuzzMe.close();
     showGenerate();

@@ -1,3 +1,10 @@
+## Building using Docker
+
+```shell
+docker build -t sfuzz .
+docker run -it sfuzz
+```
+
 ## Building from source
 
 ### Get the source code
@@ -89,7 +96,7 @@ cmake .. -G "Visual Studio 14 2015 Win64"
 ##### LINK : fatal error LNK1158: cannot run 'rc.exe'
 Rc.exe is the [Microsoft Resource Compiler](https://docs.microsoft.com/en-us/windows/desktop/menurc/resource-compiler). It's distributed with the [Windows SDK](https://developer.microsoft.com/en-US/windows/downloads/windows-10-sdk) and is required for generating the Visual Studio solution file. It can be found in the following directory: ```%ProgramFiles(x86)%\Windows Kits\<OS major version>\bin\<OS full version>\<arch>\```
 
-If you hit this error, adding the directory to your path (and launching a new command prompt) should fix the issue. 
+If you hit this error, adding the directory to your path (and launching a new command prompt) should fix the issue.
 
 ## Fuzz contract
 Create two folders `assets/` and `contracts/` in the same folder as the executable fuzzer file
