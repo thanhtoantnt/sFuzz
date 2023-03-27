@@ -95,7 +95,7 @@ vector<bool> OracleFactory::analyze() {
 				  auto cond = data == ctx.payload.data
 					  || caller == ctx.payload.callee
 					  || toHex(data).find(toHex(ctx.payload.callee)) != string::npos;
-				  if (cond) del.insert(ctx.payload.pc);
+				  if (cond && !(vulnerabilities[i])) del.insert(ctx.payload.pc);
 				  vulnerabilities[i] = vulnerabilities[i] || cond;
               }
             }
@@ -123,7 +123,7 @@ vector<bool> OracleFactory::analyze() {
           case FREEZING: {
             auto has_delegate = false;
             auto has_transfer = false;
-	    u256 fe_pc;
+	        u256 fe_pc;
             for (auto ctx: function) {
               has_delegate = has_delegate || ctx.payload.inst == Instruction::DELEGATECALL;
               has_transfer = has_transfer || (ctx.level == 1 && (
@@ -131,13 +131,15 @@ vector<bool> OracleFactory::analyze() {
                 || ctx.payload.inst == Instruction::CALLCODE
                 || ctx.payload.inst == Instruction::SUICIDE
               ));
-			  auto cond = has_delegate && !has_transfer;
-			  if (cond) {
-				  lock_ether.insert(ctx.payload.pc);
-			  }
-
-			  vulnerabilities[i] = cond;
             }
+			auto cond = has_delegate && !has_transfer;
+			if (cond) {
+				auto lock_ether_ctx = function[0];
+				lock_ether.insert(lock_ether_ctx.payload.pc);
+			}
+
+			vulnerabilities[i] = cond;
+
             break;
           }
           case UNDERFLOW: {
