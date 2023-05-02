@@ -52,67 +52,66 @@ ContractInfo Fuzzer::mainContract() {
 }
 
 void Fuzzer::showStats(const Mutation &mutation, const tuple<unordered_set<uint64_t>, unordered_set<uint64_t>> &validJumpis) {
-  // int numLines = 24, i = 0;
-  // if (!fuzzStat.clearScreen) {
-  //   for (i = 0; i < numLines; i++) cout << endl;
-  //   fuzzStat.clearScreen = true;
-  // }
-  // double duration = timer.elapsed();
-  // double fromLastNewPath = timer.elapsed() - fuzzStat.lastNewPath;
-  // for (i = 0; i < numLines; i++) cout << "\x1b[A";
-  // auto nowTrying = padStr(mutation.stageName, 20);
-  // auto stageExecProgress = to_string(mutation.stageCur) + "/" + to_string(mutation.stageMax);
-  // auto stageExecPercentage = mutation.stageMax == 0 ? to_string(100) : to_string((uint64_t)((float) (mutation.stageCur) / mutation.stageMax * 100));
-  // auto stageExec = padStr(stageExecProgress + " (" + stageExecPercentage + "%)", 20);
-  // auto allExecs = padStr(to_string(fuzzStat.totalExecs), 20);
-  // auto execSpeed = padStr(to_string((int)(fuzzStat.totalExecs / duration)), 20);
-  // auto cyclePercentage = (uint64_t)((float)(fuzzStat.idx + 1) / leaders.size() * 100);
-  // auto cycleProgress = padStr(to_string(fuzzStat.idx + 1) + " (" + to_string(cyclePercentage) + "%)", 20);
-  // auto cycleDone = padStr(to_string(fuzzStat.queueCycle), 15);
+  int numLines = 24, i = 0;
+  if (!fuzzStat.clearScreen) {
+    for (i = 0; i < numLines; i++) cout << endl;
+    fuzzStat.clearScreen = true;
+  }
+  double duration = timer.elapsed();
+  double fromLastNewPath = timer.elapsed() - fuzzStat.lastNewPath;
+  for (i = 0; i < numLines; i++) cout << "\x1b[A";
+  auto nowTrying = padStr(mutation.stageName, 20);
+  auto stageExecProgress = to_string(mutation.stageCur) + "/" + to_string(mutation.stageMax);
+  auto stageExecPercentage = mutation.stageMax == 0 ? to_string(100) : to_string((uint64_t)((float) (mutation.stageCur) / mutation.stageMax * 100));
+  auto stageExec = padStr(stageExecProgress + " (" + stageExecPercentage + "%)", 20);
+  auto allExecs = padStr(to_string(fuzzStat.totalExecs), 20);
+  auto execSpeed = padStr(to_string((int)(fuzzStat.totalExecs / duration)), 20);
+  auto cyclePercentage = (uint64_t)((float)(fuzzStat.idx + 1) / leaders.size() * 100);
+  auto cycleProgress = padStr(to_string(fuzzStat.idx + 1) + " (" + to_string(cyclePercentage) + "%)", 20);
+  auto cycleDone = padStr(to_string(fuzzStat.queueCycle), 15);
   auto totalBranches = (get<0>(validJumpis).size() + get<1>(validJumpis).size()) * 2;
-  // auto numBranches = padStr(to_string(totalBranches), 15);
+  auto numBranches = padStr(to_string(totalBranches), 15);
   auto coverage = padStr(to_string((uint64_t)((float) tracebits.size() / (float) totalBranches * 100)) + "%", 15);
-  // auto flip1 = to_string(fuzzStat.stageFinds[STAGE_FLIP1]) + "/" + to_string(mutation.stageCycles[STAGE_FLIP1]);
-  // auto flip2 = to_string(fuzzStat.stageFinds[STAGE_FLIP2]) + "/" + to_string(mutation.stageCycles[STAGE_FLIP2]);
-  // auto flip4 = to_string(fuzzStat.stageFinds[STAGE_FLIP4]) + "/" + to_string(mutation.stageCycles[STAGE_FLIP4]);
-  // auto bitflip = padStr(flip1 + ", " + flip2 + ", " + flip4, 30);
-  // auto byte1 = to_string(fuzzStat.stageFinds[STAGE_FLIP8]) + "/" + to_string(mutation.stageCycles[STAGE_FLIP8]);
-  // auto byte2 = to_string(fuzzStat.stageFinds[STAGE_FLIP16]) + "/" + to_string(mutation.stageCycles[STAGE_FLIP16]);
-  // auto byte4 = to_string(fuzzStat.stageFinds[STAGE_FLIP32]) + "/" + to_string(mutation.stageCycles[STAGE_FLIP32]);
-  // auto byteflip = padStr(byte1 + ", " + byte2 + ", " + byte4, 30);
-  // auto arith1 = to_string(fuzzStat.stageFinds[STAGE_ARITH8]) + "/" + to_string(mutation.stageCycles[STAGE_ARITH8]);
-  // auto arith2 = to_string(fuzzStat.stageFinds[STAGE_ARITH16]) + "/" + to_string(mutation.stageCycles[STAGE_ARITH16]);
-  // auto arith4 = to_string(fuzzStat.stageFinds[STAGE_ARITH32]) + "/" + to_string(mutation.stageCycles[STAGE_ARITH32]);
-  // auto arithmetic = padStr(arith1 + ", " + arith2 + ", " + arith4, 30);
-  // auto int1 = to_string(fuzzStat.stageFinds[STAGE_INTEREST8]) + "/" + to_string(mutation.stageCycles[STAGE_INTEREST8]);
-  // auto int2 = to_string(fuzzStat.stageFinds[STAGE_INTEREST16]) + "/" + to_string(mutation.stageCycles[STAGE_INTEREST16]);
-  // auto int4 = to_string(fuzzStat.stageFinds[STAGE_INTEREST32]) + "/" + to_string(mutation.stageCycles[STAGE_INTEREST32]);
-  // auto knownInts = padStr(int1 + ", " + int2 + ", " + int4, 30);
-  // auto addrDict1 = to_string(fuzzStat.stageFinds[STAGE_EXTRAS_AO]) + "/" + to_string(mutation.stageCycles[STAGE_EXTRAS_AO]);
-  // auto dict1 = to_string(fuzzStat.stageFinds[STAGE_EXTRAS_UO]) + "/" + to_string(mutation.stageCycles[STAGE_EXTRAS_UO]);
-  // auto dictionary = padStr(dict1 + ", " + addrDict1, 30);
-  // auto hav1 = to_string(fuzzStat.stageFinds[STAGE_HAVOC]) + "/" + to_string(mutation.stageCycles[STAGE_HAVOC]);
-  // auto havoc = padStr(hav1, 30);
-  // auto pending = padStr(to_string(leaders.size() - fuzzStat.idx - 1), 5);
-  // auto fav = count_if(leaders.begin(), leaders.end(), [](const pair<string, Leader> &p) {
-  //   return !p.second.item.fuzzedCount;
-  // });
-  // auto pendingFav = padStr(to_string(fav), 5);
-  // auto maxdepthStr = padStr(to_string(fuzzStat.maxdepth), 5);
-  // auto exceptionCount = padStr(to_string(uniqExceptions.size()), 5);
-  // auto predicateSize = padStr(to_string(predicates.size()), 5);
-  // auto contract = mainContract();
-  // auto toResult = [](bool val) { return val ? "found" : "none "; };
-  // // printf(cGRN Bold "%sAFL Solidity v0.0.1 (%s)" cRST "\n", padStr("", 10).c_str(), contract.contractName.substr(0, 20).c_str());
+  auto flip1 = to_string(fuzzStat.stageFinds[STAGE_FLIP1]) + "/" + to_string(mutation.stageCycles[STAGE_FLIP1]);
+  auto flip2 = to_string(fuzzStat.stageFinds[STAGE_FLIP2]) + "/" + to_string(mutation.stageCycles[STAGE_FLIP2]);
+  auto flip4 = to_string(fuzzStat.stageFinds[STAGE_FLIP4]) + "/" + to_string(mutation.stageCycles[STAGE_FLIP4]);
+  auto bitflip = padStr(flip1 + ", " + flip2 + ", " + flip4, 30);
+  auto byte1 = to_string(fuzzStat.stageFinds[STAGE_FLIP8]) + "/" + to_string(mutation.stageCycles[STAGE_FLIP8]);
+  auto byte2 = to_string(fuzzStat.stageFinds[STAGE_FLIP16]) + "/" + to_string(mutation.stageCycles[STAGE_FLIP16]);
+  auto byte4 = to_string(fuzzStat.stageFinds[STAGE_FLIP32]) + "/" + to_string(mutation.stageCycles[STAGE_FLIP32]);
+  auto byteflip = padStr(byte1 + ", " + byte2 + ", " + byte4, 30);
+  auto arith1 = to_string(fuzzStat.stageFinds[STAGE_ARITH8]) + "/" + to_string(mutation.stageCycles[STAGE_ARITH8]);
+  auto arith2 = to_string(fuzzStat.stageFinds[STAGE_ARITH16]) + "/" + to_string(mutation.stageCycles[STAGE_ARITH16]);
+  auto arith4 = to_string(fuzzStat.stageFinds[STAGE_ARITH32]) + "/" + to_string(mutation.stageCycles[STAGE_ARITH32]);
+  auto arithmetic = padStr(arith1 + ", " + arith2 + ", " + arith4, 30);
+  auto int1 = to_string(fuzzStat.stageFinds[STAGE_INTEREST8]) + "/" + to_string(mutation.stageCycles[STAGE_INTEREST8]);
+  auto int2 = to_string(fuzzStat.stageFinds[STAGE_INTEREST16]) + "/" + to_string(mutation.stageCycles[STAGE_INTEREST16]);
+  auto int4 = to_string(fuzzStat.stageFinds[STAGE_INTEREST32]) + "/" + to_string(mutation.stageCycles[STAGE_INTEREST32]);
+  auto knownInts = padStr(int1 + ", " + int2 + ", " + int4, 30);
+  auto addrDict1 = to_string(fuzzStat.stageFinds[STAGE_EXTRAS_AO]) + "/" + to_string(mutation.stageCycles[STAGE_EXTRAS_AO]);
+  auto dict1 = to_string(fuzzStat.stageFinds[STAGE_EXTRAS_UO]) + "/" + to_string(mutation.stageCycles[STAGE_EXTRAS_UO]);
+  auto dictionary = padStr(dict1 + ", " + addrDict1, 30);
+  auto hav1 = to_string(fuzzStat.stageFinds[STAGE_HAVOC]) + "/" + to_string(mutation.stageCycles[STAGE_HAVOC]);
+  auto havoc = padStr(hav1, 30);
+  auto pending = padStr(to_string(leaders.size() - fuzzStat.idx - 1), 5);
+  auto fav = count_if(leaders.begin(), leaders.end(), [](const pair<string, Leader> &p) {
+    return !p.second.item.fuzzedCount;
+  });
+  auto pendingFav = padStr(to_string(fav), 5);
+  auto maxdepthStr = padStr(to_string(fuzzStat.maxdepth), 5);
+  auto exceptionCount = padStr(to_string(uniqExceptions.size()), 5);
+  auto predicateSize = padStr(to_string(predicates.size()), 5);
+  auto contract = mainContract();
+  auto toResult = [](bool val) { return val ? "found" : "none "; };
+  // printf(cGRN Bold "%sAFL Solidity v0.0.1 (%s)" cRST "\n", padStr("", 10).c_str(), contract.contractName.substr(0, 20).c_str());
   // printf(bTL bV5 cGRN " processing time " cRST bV20 bV20 bV5 bV2 bV2 bV5 bV bTR "\n");
-  // printf(bH "run time : %s ", formatDuration(duration).data());
+  // printf(bH "      run time : %s " bH "\n", formatDuration(duration).data());
   // printf(bH " last new path : %s " bH "\n",formatDuration(fromLastNewPath).data());
   // printf(bLTR bV5 cGRN " stage progress " cRST bV5 bV10 bV2 bV bTTR bV2 cGRN " overall results " cRST bV2 bV5 bV2 bV2 bV bRTR "\n");
   // printf(bH "  now trying : %s" bH " cycles done : %s" bH "\n", nowTrying.c_str(), cycleDone.c_str());
   // printf(bH " stage execs : %s" bH "    branches : %s" bH "\n", stageExec.c_str(), numBranches.c_str());
-  printf(bH "coverage : %s" bH "\n", coverage.c_str());
-  // printf(bH "coverage : %s" bH "\n", allExecs.c_str(), coverage.c_str());
-  // prinjtf(bH "  exec speed : %s" bH "               %s" bH "\n", execSpeed.c_str(), padStr("", 15).c_str());
+  // printf(bH " total execs : %s" bH "    coverage : %s" bH "\n", allExecs.c_str(), coverage.c_str());
+  // printf(bH "  exec speed : %s" bH "               %s" bH "\n", execSpeed.c_str(), padStr("", 15).c_str());
   // printf(bH "  cycle prog : %s" bH "               %s" bH "\n", cycleProgress.c_str(), padStr("", 15).c_str());
   // printf(bLTR bV5 cGRN " fuzzing yields " cRST bV5 bV5 bV5 bV2 bV bBTR bV10 bV bTTR bV cGRN " path geometry " cRST bV2 bV2 bRTR "\n");
   // printf(bH "   bit flips : %s" bH "     pending : %s" bH "\n", bitflip.c_str(), pending.c_str());
@@ -121,13 +120,13 @@ void Fuzzer::showStats(const Mutation &mutation, const tuple<unordered_set<uint6
   // printf(bH "  known ints : %s" bH " uniq except : %s" bH "\n", knownInts.c_str(), exceptionCount.c_str());
   // printf(bH "  dictionary : %s" bH "  predicates : %s" bH "\n", dictionary.c_str(), predicateSize.c_str());
   // printf(bH "       havoc : %s" bH "               %s" bH "\n", havoc.c_str(), padStr("", 5).c_str());
-  // printf(bLTR bV5 cGRN " oracle yields " cRST bV bV10 bV5 bV bTTR bV2 bV10 bV bBTR bV bV2 bV5 bV5 bV2 bV2 bV5 bV bRTR "\n");
-  // printf(bH "            gasless send : %s " bH " dangerous delegatecall : %s " bH "\n", toResult(vulnerabilities[GASLESS_SEND]), toResult(vulnerabilities[DELEGATE_CALL]));
-  // printf(bH "      exception disorder : %s " bH "         freezing ether : %s " bH "\n", toResult(vulnerabilities[EXCEPTION_DISORDER]), toResult(vulnerabilities[FREEZING]));
-  // printf(bH "              reentrancy : %s " bH "       integer overflow : %s " bH "\n", toResult(vulnerabilities[REENTRANCY]), toResult(vulnerabilities[OVERFLOW]));
-  // printf(bH "    timestamp dependency : %s " bH "      integer underflow : %s " bH "\n", toResult(vulnerabilities[TIME_DEPENDENCY]), toResult(vulnerabilities[UNDERFLOW]));
-  // printf(bH " block number dependency : %s " bH "%s" bH "\n", toResult(vulnerabilities[NUMBER_DEPENDENCY]), padStr(" ", 32).c_str());
-  // printf(bBL bV20 bV2 bV10 bV5 bV2 bV bBTR bV10 bV5 bV20 bV2 bV2 bBR "\n");
+  printf(bLTR bV5 cGRN " oracle yields " cRST bV bV10 bV5 bV bTTR bV2 bV10 bV bBTR bV bV2 bV5 bV5 bV2 bV2 bV5 bV bRTR "\n");
+  printf(bH "            gasless send : %s " bH " dangerous delegatecall : %s " bH "\n", toResult(vulnerabilities[GASLESS_SEND]), toResult(vulnerabilities[DELEGATE_CALL]));
+  printf(bH "      exception disorder : %s " bH "         freezing ether : %s " bH "\n", toResult(vulnerabilities[EXCEPTION_DISORDER]), toResult(vulnerabilities[FREEZING]));
+  printf(bH "              reentrancy : %s " bH "       integer overflow : %s " bH "\n", toResult(vulnerabilities[REENTRANCY]), toResult(vulnerabilities[OVERFLOW]));
+  printf(bH "    timestamp dependency : %s " bH "      integer underflow : %s " bH "\n", toResult(vulnerabilities[TIME_DEPENDENCY]), toResult(vulnerabilities[UNDERFLOW]));
+  printf(bH " block number dependency : %s " bH "%s" bH "\n", toResult(vulnerabilities[NUMBER_DEPENDENCY]), padStr(" ", 32).c_str());
+  printf(bBL bV20 bV2 bV10 bV5 bV2 bV bBTR bV10 bV5 bV20 bV2 bV2 bBR "\n");
 }
 
 void Fuzzer::writeStats(const Mutation &mutation, const tuple<unordered_set<uint64_t>, unordered_set<uint64_t>> &validJumpis)
