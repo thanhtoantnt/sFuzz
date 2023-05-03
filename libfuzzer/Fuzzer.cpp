@@ -132,25 +132,25 @@ void Fuzzer::showStats(Mutation mutation, OracleResult oracleResult) {
   auto typeExceptionCount = padStr(to_string(uniqExceptions.size()), 5);
   auto contract = mainContract();
   printf(cGRN Bold "%sAFL Solidity v0.0.1 (%s)" cRST "\n", padStr("", 10).c_str(), contract.contractName.substr(0, 20).c_str());
-  printf(bTL bV5 cGRN " processing time " cRST bV20 bV20 bV5 bV2 bV2 bV5 bV bTR "\n");
-  printf(bH "      run time : %s " bH "\n", formatDuration(duration).data());
-  printf(bH " last new path : %s " bH "\n",formatDuration(fromLastNewPath).data());
-  printf(bLTR bV5 cGRN " stage progress " cRST bV5 bV10 bV2 bV bTTR bV2 cGRN " overall results " cRST bV2 bV5 bV2 bV2 bV bRTR "\n");
-  printf(bH "  now trying : %s" bH " cycles done : %s" bH "\n", nowTrying.c_str(), cycleDone.c_str());
-  printf(bH " stage execs : %s" bH "      tuples : %s" bH "\n", stageExec.c_str(), coveredTupleStr.c_str());
-  printf(bH " total execs : %s" bH "    branches : %s" bH "\n", allExecs.c_str(), numBranches.c_str());
-  printf(bH "  exec speed : %s" bH "  bit/tuples : %s" bH "\n", execSpeed.c_str(), bitPerTupe.c_str());
+  // printf(bTL bV5 cGRN " processing time " cRST bV20 bV20 bV5 bV2 bV2 bV5 bV bTR "\n");
+  // printf(bH "      run time : %s " bH "\n", formatDuration(duration).data());
+  // printf(bH " last new path : %s " bH "\n",formatDuration(fromLastNewPath).data());
+  // printf(bLTR bV5 cGRN " stage progress " cRST bV5 bV10 bV2 bV bTTR bV2 cGRN " overall results " cRST bV2 bV5 bV2 bV2 bV bRTR "\n");
+  // printf(bH "  now trying : %s" bH " cycles done : %s" bH "\n", nowTrying.c_str(), cycleDone.c_str());
+  // printf(bH " stage execs : %s" bH "      tuples : %s" bH "\n", stageExec.c_str(), coveredTupleStr.c_str());
+  // printf(bH " total execs : %s" bH "    branches : %s" bH "\n", allExecs.c_str(), numBranches.c_str());
+  // printf(bH "  exec speed : %s" bH "  bit/tuples : %s" bH "\n", execSpeed.c_str(), bitPerTupe.c_str());
   printf(bH "  cycle prog : %s" bH "    coverage : %s" bH "\n", cycleProgress.c_str(), coverage.c_str());
-  printf(bLTR bV5 cGRN " fuzzing yields " cRST bV5 bV5 bV5 bV2 bV bBTR bV10 bV bTTR bV cGRN " path geometry " cRST bV2 bV2 bRTR "\n");
-  printf(bH "   bit flips : %s" bH "     pending : %s" bH "\n", bitflip.c_str(), pending.c_str());
-  printf(bH "  byte flips : %s" bH " pending fav : %s" bH "\n", byteflip.c_str(), pendingFav.c_str());
-  printf(bH " arithmetics : %s" bH "   max depth : %s" bH "\n", arithmetic.c_str(), maxdepthStr.c_str());
-  printf(bH "  known ints : %s" bH " except type : %s" bH "\n", knownInts.c_str(), typeExceptionCount.c_str());
-  printf(bH "  dictionary : %s" bH " uniq except : %s" bH "\n", dictionary.c_str(), exceptionCount.c_str());
-  printf(bH "       havoc : %s" bH "  predicates : %s" bH "\n", havoc.c_str(), predicateSize.c_str());
-  printf(bH "      random : %s" bH "                    " bH "\n", random.c_str());
-  printf(bH "  call order : %s" bH "                    " bH "\n", callOrder.c_str());
-  printf(bLTR bV5 cGRN " oracle yields " cRST bV bV10 bV5 bV bTTR bV2 bV10 bV bBTR bV bV2 bV5 bV5 bV2 bV2 bV5 bV bRTR "\n");
+  // printf(bLTR bV5 cGRN " fuzzing yields " cRST bV5 bV5 bV5 bV2 bV bBTR bV10 bV bTTR bV cGRN " path geometry " cRST bV2 bV2 bRTR "\n");
+  // printf(bH "   bit flips : %s" bH "     pending : %s" bH "\n", bitflip.c_str(), pending.c_str());
+  // printf(bH "  byte flips : %s" bH " pending fav : %s" bH "\n", byteflip.c_str(), pendingFav.c_str());
+  // printf(bH " arithmetics : %s" bH "   max depth : %s" bH "\n", arithmetic.c_str(), maxdepthStr.c_str());
+  // printf(bH "  known ints : %s" bH " except type : %s" bH "\n", knownInts.c_str(), typeExceptionCount.c_str());
+  // printf(bH "  dictionary : %s" bH " uniq except : %s" bH "\n", dictionary.c_str(), exceptionCount.c_str());
+  // printf(bH "       havoc : %s" bH "  predicates : %s" bH "\n", havoc.c_str(), predicateSize.c_str());
+  // printf(bH "      random : %s" bH "                    " bH "\n", random.c_str());
+  // printf(bH "  call order : %s" bH "                    " bH "\n", callOrder.c_str());
+  // printf(bLTR bV5 cGRN " oracle yields " cRST bV bV10 bV5 bV bTTR bV2 bV10 bV bBTR bV bV2 bV5 bV5 bV2 bV2 bV5 bV bRTR "\n");
   auto toResult = [](u256 val){
     if (val > 0) return "found";
     return "none ";
@@ -500,7 +500,7 @@ void Fuzzer::start() {
               mutation.overwriteWithAddressDictionary(save);
               fuzzStat.stageFinds[STAGE_EXTRAS_AO] += queues.size() - origHitCount;
               origHitCount = queues.size();
-              
+
               mutation.havoc(save);
               fuzzStat.stageFinds[STAGE_HAVOC] += queues.size() - origHitCount;
               origHitCount = queues.size();
